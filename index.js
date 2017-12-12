@@ -1,10 +1,10 @@
 var express = require("express")
-const sql = require("sqlite3")
+const sqlite3 = require("sqlite3")
 var bodyParser = require('body-parser')
 var app = express()
 app.use(bodyParser.urlencoded({ extended: false }))
 
-let db = new sqlite3.Database('./nut.db', (err) => {
+var db = new sqlite3.Database('./nut.db', (err) => {
     if (err) {
       console.error(err.message);
     }
@@ -15,11 +15,21 @@ app.post("/nut", function(req, res) {
     console.log(req)
     var id = body.user_id
     var nutCount = incrementNut(id)
-    res.send("WOW, " + body.user_name + " has nutted " + str(nutCount) + " times!")
+    response = {
+        "text": "It's 80 degrees right now.",
+        "attachments": [
+            {
+                "text":"WOW, " + body.user_name + " has nutted " + str(nutCount) + " times!"
+            }
+        ]
+    }
+    res.setHeader("Content-Type","application/json")
+    res.send(JSON.stringify(response))
 })
 
 function incrementNut(user) {
     db.get("FROM NUT SELECT * WHERE id=" + user, (err, row) => {
+        print("Got user:", user)
         if (err != null) {
             if (row != undefined) {
                 var nutCount = row.count
