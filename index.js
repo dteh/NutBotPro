@@ -45,4 +45,4 @@ function incrementNut(user) {
     })
 }
 
-app.listen()
+app.listen(80, ()=> {console.log("Listening on port 80")})
