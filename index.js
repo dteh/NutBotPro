@@ -23,11 +23,11 @@ function incrementNut(user) {
         if (err != null) {
             if (row != undefined) {
                 var nutCount = row.count
-                db.update("UPDATE NUT SELECT count = " + str(nutCount + 1) + " WHERE id = " + user, () => {
+                db.run("UPDATE NUT SELECT count = " + str(nutCount + 1) + " WHERE id = " + user, () => {
                     return nutCount + 1
                 })
             } else {
-                db.exec("INSERT INTO NUT (id, count) VALUES (" + user + ", 1)", () => {
+                db.run("INSERT INTO NUT (id, count) VALUES (" + user + ", 1)", () => {
                     return 1
                 })
             }
