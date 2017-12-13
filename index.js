@@ -53,6 +53,7 @@ function returnNutResponse(res, username, nutCount) {
     console.log("returning Nut Response!")
     var response = {
         "text": "NUT ALERT!!!",
+        "response_type": "in_channel",
         "attachments": [
             {
                 "text":"WOW, " + username + " has JUST nutted! That makes it " + nutCount.toString() + " time(s)!"
