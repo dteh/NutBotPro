@@ -12,37 +12,55 @@ var db = new sqlite3.Database('./nut.db', (err) => {
   });
 
 app.post("/nut", function(req, res) {
-    console.log(req)
-    var id = body.user_id
-    var nutCount = incrementNut(id)
-    response = {
-        "text": "It's 80 degrees right now.",
+    // console.log(req)
+    var id = req.body.user_id
+    var nutResponder = returnNutResponse.bind(null, res, req.body.user_name)
+    incrementNut(id, nutResponder)
+})
+
+function incrementNut(user, callback) {
+    db.get("SELECT * FROM NUT WHERE id=\"" + user + "\"", (err, row) => {
+        console.log("Got user:", user)
+        console.log("row",row)
+        console.log("err",err)
+        if (err == null) {
+            console.log(row)
+            if (row != undefined) {
+                var nutCount = row.count
+                db.run("UPDATE NUT SET count = " + (nutCount + 1).toString() + " WHERE id = \"" + user + "\"", [], (err) => {
+                    if (err != null) {
+                        console.log(err)
+                    } else { 
+                        callback(nutCount + 1)
+                    }
+                })
+            } else {
+                db.run("INSERT INTO NUT (id, count) VALUES (\"" + user + "\", \"1\")", [], (err) => {
+                    if (err != null) {
+                        console.log(err)
+                    } else {
+                        callback(1)                        
+                    }
+                })
+            }
+        } else {
+            console.log(err)
+        }
+    })
+}
+
+function returnNutResponse(res, username, nutCount) { 
+    console.log("returning Nut Response!")
+    var response = {
+        "text": "NUT ALERT!!!",
         "attachments": [
             {
-                "text":"WOW, " + body.user_name + " has nutted " + str(nutCount) + " times!"
+                "text":"WOW, " + username + " has JUST nutted! That makes it " + nutCount.toString() + " time(s)!"
             }
         ]
     }
     res.setHeader("Content-Type","application/json")
     res.send(JSON.stringify(response))
-})
-
-function incrementNut(user) {
-    db.get("FROM NUT SELECT * WHERE id=" + user, (err, row) => {
-        print("Got user:", user)
-        if (err != null) {
-            if (row != undefined) {
-                var nutCount = row.count
-                db.run("UPDATE NUT SELECT count = " + str(nutCount + 1) + " WHERE id = " + user, () => {
-                    return nutCount + 1
-                })
-            } else {
-                db.run("INSERT INTO NUT (id, count) VALUES (" + user + ", 1)", () => {
-                    return 1
-                })
-            }
-        }
-    })
 }
 
 app.listen(80, ()=> {console.log("Listening on port 80")})
