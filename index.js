@@ -14,7 +14,14 @@ var db = new sqlite3.Database('./nut.db', (err) => {
 app.post("/nut", function(req, res) {
     // console.log(req)
     var id = req.body.user_id
-    var nutResponder = returnNutResponse.bind(null, res, req.body.user_name)
+    var chan = req.body.channel_id
+    var allowed;
+    if (chan === "C4EF0S8JK") {
+        allowed = true
+    } else {
+        allowed = false
+    }
+    var nutResponder = returnNutResponse.bind(null, res, req.body.user_name, allowed)
     incrementNut(id, nutResponder)
 })
 
@@ -49,17 +56,25 @@ function incrementNut(user, callback) {
     })
 }
 
-function returnNutResponse(res, username, nutCount) { 
+function returnNutResponse(res, username, allowed, nutCount) { 
     console.log("returning Nut Response!")
-    var response = {
-        "text": "NUT ALERT!!!",
-        "response_type": "in_channel",
-        "attachments": [
-            {
-                "text":"WOW, " + username + " has JUST nutted! That makes it " + nutCount.toString() + " time(s)!"
-            }
-        ]
+    var response
+    if (allowed) {
+        response = {
+            "text": "NUT ALERT!!!",
+            "response_type": "in_channel",
+            "attachments": [
+                {
+                    "text":"WOW, " + username + " has JUST nutted! That makes it " + nutCount.toString() + " time(s)!"
+                }
+            ]
+        }
+    } else {
+        response = {
+            "text": "You're not allowed to nut in this channel! :rage:"
+        }
     }
+
     res.setHeader("Content-Type","application/json")
     res.send(JSON.stringify(response))
 }
